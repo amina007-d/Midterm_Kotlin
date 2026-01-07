@@ -1,5 +1,3 @@
-import java.util.Scanner
-
 interface Identifiable {
     val id: Int
 }
@@ -16,18 +14,17 @@ data class Task(
 ) : Identifiable
 
 fun main() {
-    val scanner = Scanner(System.`in`)
     val tasks = mutableListOf<Task>()
     var nextId = 1
 
     while (true) {
         printMenu()
-        when (scanner.nextLine().trim()) {
-            "1" -> nextId = addTask(scanner, tasks, nextId)
+        when (readLine()?.trim()) {
+            "1" -> nextId = addTask(tasks, nextId)
             "2" -> listTasks(tasks)
-            "3" -> updateTask(scanner, tasks)
-            "4" -> deleteTask(scanner, tasks)
-            "5" -> filterTasks(scanner, tasks)
+            "3" -> updateTask(tasks)
+            "4" -> deleteTask(tasks)
+            "5" -> filterTasks(tasks)
             "6" -> return
             else -> println("Invalid option")
         }
@@ -37,7 +34,7 @@ fun main() {
 fun printMenu() {
     println(
         """
-        |Task Tracker 
+        |Task Tracker
         |1. Add task
         |2. List tasks
         |3. Update task
@@ -48,28 +45,26 @@ fun printMenu() {
     )
 }
 
-fun addTask(scanner: Scanner, tasks: MutableList<Task>, nextId: Int): Int {
+fun addTask(tasks: MutableList<Task>, nextId: Int): Int {
     print("Title: ")
-    val title = scanner.nextLine().trim()
+    val title = readLine()?.trim().orEmpty()
     if (title.isEmpty()) {
         println("Title cannot be empty")
         return nextId
     }
 
     print("Description: ")
-    val description = scanner.nextLine().trim()
+    val description = readLine()?.trim().orEmpty()
 
     print("Priority (LOW / MEDIUM / HIGH): ")
     val priority = try {
-        Priority.valueOf(scanner.nextLine().trim().uppercase())
+        Priority.valueOf(readLine()?.trim()?.uppercase().orEmpty())
     } catch (e: Exception) {
         println("Invalid priority")
         return nextId
     }
 
-    val task = Task(nextId, title, description, priority, Status.TODO)
-    tasks.add(task)
-
+    tasks.add(Task(nextId, title, description, priority, Status.TODO))
     println("Task added with ID $nextId")
     return nextId + 1
 }
@@ -79,19 +74,18 @@ fun listTasks(tasks: List<Task>) {
         println("No tasks available")
         return
     }
-
     tasks.forEach { println(it) }
 }
 
-fun updateTask(scanner: Scanner, tasks: MutableList<Task>) {
+fun updateTask(tasks: MutableList<Task>) {
     print("Enter task ID: ")
-    val id = scanner.nextLine().toIntOrNull()
+    val id = readLine()?.toIntOrNull()
 
     val task = tasks.find { it.id == id }
     task?.let {
         print("New status (TODO / IN_PROGRESS / DONE): ")
         val newStatus = try {
-            Status.valueOf(scanner.nextLine().trim().uppercase())
+            Status.valueOf(readLine()?.trim()?.uppercase().orEmpty())
         } catch (e: Exception) {
             println("Invalid status")
             return
@@ -101,34 +95,31 @@ fun updateTask(scanner: Scanner, tasks: MutableList<Task>) {
     } ?: println("Task not found")
 }
 
-fun deleteTask(scanner: Scanner, tasks: MutableList<Task>) {
+fun deleteTask(tasks: MutableList<Task>) {
     print("Enter task ID to delete: ")
-    val id = scanner.nextLine().toIntOrNull()
+    val id = readLine()?.toIntOrNull()
 
     val removed = tasks.removeIf { it.id == id }
     println(if (removed) "Task deleted" else "Task not found")
 }
 
-fun filterTasks(scanner: Scanner, tasks: List<Task>) {
+fun filterTasks(tasks: List<Task>) {
     println("1. Filter by status")
     println("2. Sort by priority")
-    when (scanner.nextLine().trim()) {
+    when (readLine()?.trim()) {
         "1" -> {
             print("Status (TODO / IN_PROGRESS / DONE): ")
             val status = try {
-                Status.valueOf(scanner.nextLine().trim().uppercase())
+                Status.valueOf(readLine()?.trim()?.uppercase().orEmpty())
             } catch (e: Exception) {
                 println("Invalid status")
                 return
             }
-
-            val result = tasks.filter { it.status == status }
-            result.forEach { println(it) }
+            tasks.filter { it.status == status }.forEach { println(it) }
         }
 
         "2" -> {
-            val sorted = tasks.sortedBy { it.priority }
-            sorted.forEach { println(it) }
+            tasks.sortedBy { it.priority }.forEach { println(it) }
         }
 
         else -> println("Invalid option")
